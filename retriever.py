@@ -10,7 +10,9 @@ def retrieve_chunks(question, collection):
     )
     
     chunks = results['documents'][0]
-    return chunks
+    pages = [meta["page"] for meta in results['metadatas'][0]]
+    
+    return chunks, pages
 
 if __name__ == "__main__":
     from ingest import ingest_pdf

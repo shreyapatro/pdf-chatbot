@@ -35,9 +35,12 @@ if question and st.session_state.collection is not None:
         st.write(question)
     
     with st.spinner("Thinking..."):
-        chunks = retrieve_chunks(question, st.session_state.collection)
+        chunks, pages = retrieve_chunks(question, st.session_state.collection)
         answer = get_answer(question, chunks, st.session_state.history)
+        unique_pages = sorted(set(pages))
+        source_text = ", ".join(str(p) for p in unique_pages)
     
     st.session_state.history.append({"role": "assistant", "content": answer})
     with st.chat_message("assistant"):
         st.write(answer)
+        st.caption(f"📄 Source: Page {source_text}")
