@@ -40,7 +40,7 @@ flowchart TD
         J --> K[Answer shown in Streamlit chat]
     end
 
-    Phase1 -.ready for.-> Phase2
+    Phase1 -.-> Phase2
 ```
 
 ## Tech stack
