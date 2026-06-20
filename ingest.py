@@ -50,6 +50,13 @@ def ingest_pdf(pdf_path):
     total_chars = sum(len(p["text"]) for p in pages)
     print(f"Extracted {total_chars} characters from {len(pages)} pages")
 
+    if total_chars < 50:
+        raise ValueError(
+            "This PDF appears to have no readable text. "
+            "It might be a scanned document or an image-based PDF. "
+            "Please upload a digital PDF instead."
+        )
+
     print("Chunking text...")
     chunks, metadata = chunk_text(pages)
     print(f"Created {len(chunks)} chunks")

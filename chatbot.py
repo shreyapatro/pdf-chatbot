@@ -35,16 +35,19 @@ def get_answer(question, chunks, history):
     
     prompt = build_prompt(question, chunks, history)
     
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        max_tokens=1000,
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=1000,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        answer = response.choices[0].message.content
+        return answer
     
-    answer = response.choices[0].message.content
-    return answer
+    except Exception as e:
+        return f"Sorry, I couldn't generate an answer right now. Error: {e}"
 
 
 if __name__ == "__main__":

@@ -18,10 +18,17 @@ if uploaded_file is not None and st.session_state.collection is None:
     with open("temp.pdf", "wb") as f:
         f.write(uploaded_file.getbuffer())
     
-    with st.spinner("Reading your document..."):
-        st.session_state.collection = ingest_pdf("temp.pdf")
+    try:
+        with st.spinner("Reading your document..."):
+            st.session_state.collection = ingest_pdf("temp.pdf")
+        
+        st.success("Document ready! Ask me anything about it.")
     
-    st.success("Document ready! Ask me anything about it.")
+    except ValueError as e:
+        st.error(str(e))
+    
+    except Exception as e:
+        st.error(f"Something went wrong while processing this PDF: {e}")
 
 for message in st.session_state.history:
     with st.chat_message(message["role"]):
