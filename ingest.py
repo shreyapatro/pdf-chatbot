@@ -34,7 +34,11 @@ def embed_chunks(chunks):
     return embeddings
 
 def store_in_chroma(chunks, embeddings, metadata):
-    client = chromadb.Client()
+    client = chromadb.PersistentClient(path="./chroma_db")
+    
+    if "pdf_chunks" in [c.name for c in client.list_collections()]:
+        client.delete_collection("pdf_chunks")
+    
     collection = client.create_collection(name="pdf_chunks")
     collection.add(
         documents=chunks,
