@@ -12,6 +12,12 @@ if "collection" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+if st.session_state.collection is not None:
+    if st.button("🔄 Upload a new document"):
+        st.session_state.collection = None
+        st.session_state.history = []
+        st.rerun()
+
 uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
 
 if uploaded_file is not None and st.session_state.collection is None:
