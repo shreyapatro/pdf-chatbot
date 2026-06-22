@@ -48,7 +48,29 @@ def store_in_chroma(chunks, embeddings, metadata):
     )
     return collection
 
-def ingest_pdf(pdf_path):
+def load_existing_collection():
+    import os
+    if not os.path.exists("./chroma_db") or not os.path.exists("last_doc.txt"):
+        return None, None
+    
+    try:
+        client = chromadb.PersistentClient(path="./chroma_db")
+        collection_names = [c.name for c in client.list_collections()]
+        
+        if "pdf_chunks" not in collection_names:
+            return None, None
+        
+        collection = client.get_collection("pdf_chunks")
+        
+        with open("last_doc.txt", "r") as f:
+            filename = f.read().strip()
+        
+        return collection, filename
+    
+    except Exception:
+        return None, None
+
+def ingest_pdf(pdf_path, original_filename="document.pdf"):
     print("Extracting text from PDF...")
     pages = extract_text(pdf_path)
     total_chars = sum(len(p["text"]) for p in pages)
@@ -72,6 +94,9 @@ def ingest_pdf(pdf_path):
     print("Storing in ChromaDB...")
     collection = store_in_chroma(chunks, embeddings, metadata)
     print(f"Stored {collection.count()} chunks in ChromaDB")
+
+    with open("last_doc.txt", "w") as f:
+        f.write(original_filename)
 
     return collection
 

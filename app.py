@@ -1,5 +1,5 @@
 import streamlit as st
-from ingest import ingest_pdf
+from ingest import ingest_pdf, load_existing_collection
 from retriever import retrieve_chunks
 from chatbot import get_answer, stream_answer
 
@@ -7,15 +7,19 @@ st.set_page_config(page_title="PDF Chatbot", page_icon="📄")
 st.title("📄 Chat with your PDF")
 
 if "collection" not in st.session_state:
-    st.session_state.collection = None
+    collection, filename = load_existing_collection()
+    st.session_state.collection = collection
+    st.session_state.loaded_filename = filename
 
 if "history" not in st.session_state:
     st.session_state.history = []
 
 if st.session_state.collection is not None:
+    st.info(f"📂 Currently loaded: {st.session_state.loaded_filename}")
     if st.button("🔄 Upload a new document"):
         st.session_state.collection = None
         st.session_state.history = []
+        st.session_state.loaded_filename = None
         st.rerun()
 
 uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
@@ -26,7 +30,8 @@ if uploaded_file is not None and st.session_state.collection is None:
     
     try:
         with st.spinner("Reading your document..."):
-            st.session_state.collection = ingest_pdf("temp.pdf")
+            st.session_state.collection = ingest_pdf("temp.pdf", uploaded_file.name)
+            st.session_state.loaded_filename = uploaded_file.name
         
         st.success("Document ready! Ask me anything about it.")
     
