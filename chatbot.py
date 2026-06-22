@@ -48,6 +48,29 @@ def get_answer(question, chunks, history):
     
     except Exception as e:
         return f"Sorry, I couldn't generate an answer right now. Error: {e}"
+    
+def stream_answer(question, chunks, history):
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    
+    prompt = build_prompt(question, chunks, history)
+    
+    try:
+        stream = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=1000,
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            stream=True
+        )
+        
+        for chunk in stream:
+            content = chunk.choices[0].delta.content
+            if content is not None:
+                yield content
+    
+    except Exception as e:
+        yield f"Sorry, I couldn't generate an answer right now. Error: {e}"
 
 
 if __name__ == "__main__":

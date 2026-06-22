@@ -1,7 +1,7 @@
 import streamlit as st
 from ingest import ingest_pdf
 from retriever import retrieve_chunks
-from chatbot import get_answer
+from chatbot import get_answer, stream_answer
 
 st.set_page_config(page_title="PDF Chatbot", page_icon="📄")
 st.title("📄 Chat with your PDF")
@@ -47,13 +47,12 @@ if question and st.session_state.collection is not None:
     with st.chat_message("user"):
         st.write(question)
     
-    with st.spinner("Thinking..."):
-        chunks, pages = retrieve_chunks(question, st.session_state.collection)
-        answer = get_answer(question, chunks, st.session_state.history)
-        unique_pages = sorted(set(pages))
-        source_text = ", ".join(str(p) for p in unique_pages)
+    chunks, pages = retrieve_chunks(question, st.session_state.collection)
+    unique_pages = sorted(set(pages))
+    source_text = ", ".join(str(p) for p in unique_pages)
+    
+    with st.chat_message("assistant"):
+        answer = st.write_stream(stream_answer(question, chunks, st.session_state.history))
+        st.caption(f"📄 Source: Page {source_text}")
     
     st.session_state.history.append({"role": "assistant", "content": answer})
-    with st.chat_message("assistant"):
-        st.write(answer)
-        st.caption(f"📄 Source: Page {source_text}")
